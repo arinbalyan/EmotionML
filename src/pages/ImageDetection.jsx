@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Upload, Image as ImageIcon, X, Loader2, AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import ModelSelector from '../components/ModelSelector';
 import EmotionCard from '../components/EmotionCard';
@@ -50,11 +50,6 @@ const ImageDetection = () => {
     'sadness': '😢'
   };
 
-  // Check API status on component mount
-  useState(() => {
-    checkApiStatus();
-  }, []);
-
   const checkApiStatus = async () => {
     try {
       const response = await fetch(API_ENDPOINTS.HEALTH);
@@ -67,6 +62,11 @@ const ImageDetection = () => {
       setApiStatus('offline');
     }
   };
+
+  // Check API status on component mount
+  useEffect(() => {
+    checkApiStatus();
+  }, []);
 
   const handleImageSelect = (event) => {
     const file = event.target.files[0];
