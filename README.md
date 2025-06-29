@@ -6,10 +6,11 @@ A comprehensive real-time emotion detection system powered by deep learning mode
 
 - **9 Pre-trained Models**: Choose from MobileNetV2, ResNet50, and VGG19 architectures trained on FER2013, RAF-DB, and CK+48 datasets
 - **Real-time Detection**: Live emotion recognition through webcam with instant results
+- **Image Upload**: Upload images for emotion analysis with detailed confidence scores
 - **Interactive Web Interface**: Clean, responsive UI with dark/light mode support
 - **High Accuracy**: Up to 98.99% accuracy on controlled datasets, 80.28% on real-world scenarios
 - **FastAPI Backend**: High-performance API with automatic model loading and GPU acceleration
-- **Comprehensive Documentation**: Complete guides for setup, API usage, and deployment
+- **Deployment Ready**: Complete deployment guides for multiple platforms
 
 ## 📊 Model Performance
 
@@ -91,11 +92,59 @@ backend/results/
 - **Backend API**: http://localhost:8000
 - **API Documentation**: http://localhost:8000/docs
 
+## 🌐 Deployment
+
+### Frontend Deployment (Netlify)
+The frontend is already deployed at: https://lively-cannoli-82572a.netlify.app
+
+### Backend Deployment Options
+
+#### 1. Railway (Recommended)
+```bash
+# 1. Create account at railway.app
+# 2. Connect your GitHub repository
+# 3. Deploy from the backend folder
+# 4. Railway will use the Dockerfile automatically
+```
+
+#### 2. Render
+```bash
+# 1. Create account at render.com
+# 2. Create new Web Service
+# 3. Set build command: pip install -r requirements.txt
+# 4. Set start command: uvicorn main:app --host 0.0.0.0 --port $PORT
+```
+
+#### 3. Vercel (Serverless)
+```bash
+# 1. Install Vercel CLI: npm i -g vercel
+# 2. Run vercel in the backend directory
+# 3. Uses serverless configuration with mock predictions
+```
+
+#### 4. Local Docker
+```bash
+cd backend
+docker build -t emotion-api .
+docker run -p 8000:8000 emotion-api
+```
+
+### Environment Configuration
+
+After deploying your backend, update the frontend environment:
+
+1. Create `.env` file in the root directory:
+```bash
+VITE_API_URL=https://your-backend-domain.railway.app
+```
+
+2. Redeploy the frontend to Netlify with the new environment variable.
+
 ## 📱 Usage
 
 1. **Select Model**: Choose from 9 available models based on your accuracy/speed requirements
-2. **Enable Camera**: Grant camera permissions for real-time detection
-3. **Start Detection**: Click "Start Detection" to begin emotion analysis
+2. **Live Detection**: Enable camera permissions and click "Start Detection"
+3. **Image Upload**: Upload an image and click "Analyze Emotion"
 4. **View Results**: See real-time emotion predictions with confidence scores
 
 ## 🏗️ Project Structure
@@ -106,34 +155,27 @@ emotion-detection-app/
 │   ├── components/         # Reusable UI components
 │   ├── pages/             # Application pages
 │   ├── contexts/          # React contexts (theme)
+│   ├── config/            # API configuration
 │   └── main.tsx           # Application entry point
 ├── backend/               # FastAPI backend
 │   ├── main.py           # FastAPI application
+│   ├── main-serverless.py # Serverless version
 │   ├── requirements.txt  # Python dependencies
+│   ├── Dockerfile        # Docker configuration
+│   ├── railway.json      # Railway deployment config
+│   ├── render.yaml       # Render deployment config
+│   ├── vercel.json       # Vercel deployment config
 │   ├── results/          # Model files directory
+│   ├── DEPLOYMENT.md     # Deployment guide
 │   └── README.md         # Backend documentation
 ├── public/               # Static assets
+├── .env.example          # Environment variables template
 └── README.md            # This file
 ```
 
-## 🎨 Design System
+## 📖 API Documentation
 
-### Color Palette
-- **Light Mode**: Primary (White), Secondary (Black), Accent (Red)
-- **Dark Mode**: Primary (Black), Secondary (White), Accent (Red)
-
-### Typography
-- **Headings**: 3 font weights maximum
-- **Body Text**: 150% line spacing
-- **Code**: Monospace font family
-
-### Spacing
-- **8px Grid System**: Consistent spacing throughout
-- **Responsive Breakpoints**: Mobile-first approach
-
-## 📖 Documentation
-
-### API Endpoints
+### Endpoints
 
 #### GET /api/v1/models
 Get information about available models and their configurations.
@@ -158,28 +200,6 @@ Health check endpoint for monitoring API status.
 - **ResNet50**: 25.6M parameters, balanced performance
 - **VGG19**: 143.7M parameters, highest accuracy
 
-## 🚀 Deployment
-
-### Production Build
-```bash
-# Frontend
-npm run build
-
-# Backend
-pip install gunicorn
-gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker
-```
-
-### Environment Variables
-```bash
-# Frontend (.env)
-VITE_API_URL=http://localhost:8000
-
-# Backend
-PORT=8000
-HOST=0.0.0.0
-```
-
 ## 🔧 Development
 
 ### Adding New Models
@@ -187,10 +207,36 @@ HOST=0.0.0.0
 2. Place model file in `backend/results/`
 3. Update documentation and frontend model list
 
-### Custom Themes
-1. Modify color values in `tailwind.config.js`
-2. Update theme context in `src/contexts/ThemeContext.jsx`
-3. Test across all components and pages
+### Environment Variables
+```bash
+# Frontend
+VITE_API_URL=http://localhost:8000
+
+# Backend
+PORT=8000
+HOST=0.0.0.0
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **API Connection Failed**
+   - Check if backend server is running
+   - Verify API URL in environment variables
+   - Check CORS configuration
+
+2. **Model files not found**
+   - Verify files are in `backend/results/` directory
+   - Check file names match configuration exactly
+
+3. **Camera access denied**
+   - Enable camera permissions in browser settings
+   - Ensure HTTPS in production (required for camera access)
+
+4. **Slow inference**
+   - Check GPU availability and CUDA installation
+   - Consider using MobileNetV2 for faster inference
 
 ## 📋 Requirements
 
@@ -204,26 +250,6 @@ HOST=0.0.0.0
 - **Firefox**: 88+
 - **Safari**: 14+
 - **Edge**: 90+
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **Model files not found**
-   - Verify files are in `backend/results/` directory
-   - Check file names match configuration exactly
-
-2. **Camera access denied**
-   - Enable camera permissions in browser settings
-   - Ensure HTTPS in production (required for camera access)
-
-3. **Slow inference**
-   - Check GPU availability and CUDA installation
-   - Consider using MobileNetV2 for faster inference
-
-4. **CORS errors**
-   - Verify frontend and backend URLs in configuration
-   - Check CORS middleware settings in FastAPI
 
 ## 🤝 Contributing
 
@@ -247,10 +273,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 📞 Support
 
 For questions, issues, or contributions:
-- Create an issue on GitHub
-- Check the documentation at `/documentation` 
+- Check the backend deployment guide at `backend/DEPLOYMENT.md`
 - Review the API docs at `/docs` (when backend is running)
+- Create an issue on GitHub
 
 ---
 
 **Built with ❤️ using React, FastAPI, and PyTorch**
+
+### Live Demo
+- **Frontend**: https://lively-cannoli-82572a.netlify.app
+- **Backend**: Deploy using the guide in `backend/DEPLOYMENT.md`

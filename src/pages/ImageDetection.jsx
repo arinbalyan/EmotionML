@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
-import { Upload, Image as ImageIcon, X, Loader2, AlertCircle } from 'lucide-react';
+import { Upload, Image as ImageIcon, X, Loader2, AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import ModelSelector from '../components/ModelSelector';
 import EmotionCard from '../components/EmotionCard';
+import { API_ENDPOINTS } from '../config/api';
 
 const ImageDetection = () => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -10,6 +11,7 @@ const ImageDetection = () => {
   const [emotions, setEmotions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [apiStatus, setApiStatus] = useState('checking');
   const fileInputRef = useRef(null);
 
   const models = [
@@ -46,6 +48,24 @@ const ImageDetection = () => {
     'contempt': '😤',
     'happy': '😊',
     'sadness': '😢'
+  };
+
+  // Check API status on component mount
+  useState(() => {
+    checkApiStatus();
+  }, []);
+
+  const checkApiStatus = async () => {
+    try {
+      const response = await fetch(API_ENDPOINTS.HEALTH);
+      if (response.ok) {
+        setApiStatus('connected');
+      } else {
+        setApiStatus('error');
+      }
+    } catch (err) {
+      setApiStatus('offline');
+    }
   };
 
   const handleImageSelect = (event) => {
@@ -110,6 +130,11 @@ const ImageDetection = () => {
       return;
     }
 
+    if (apiStatus !== 'connected') {
+      setError('Backend API is not available. Please check the server status.');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -118,7 +143,7 @@ const ImageDetection = () => {
       formData.append('file', selectedImage);
       formData.append('model', currentModel);
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/predict`, {
+      const response = await fetch(API_ENDPOINTS.PREDICT, {
         method: 'POST',
         body: formData,
       });
@@ -139,12 +164,14 @@ const ImageDetection = () => {
         // Sort by confidence descending
         emotionData.sort((a, b) => b.confidence - a.confidence);
         setEmotions(emotionData);
+        setApiStatus('connected');
       } else {
         throw new Error(data.error || 'Prediction failed');
       }
     } catch (err) {
       console.error('Prediction error:', err);
       setError(`Analysis failed: ${err.message}`);
+      setApiStatus('error');
     } finally {
       setIsLoading(false);
     }
@@ -161,6 +188,34 @@ const ImageDetection = () => {
             Upload an image to analyze facial expressions and detect emotions. 
             Our AI models will provide confidence scores for each detected emotion.
           </p>
+          
+          {/* API Status Indicator */}
+          <div className="mt-4 flex items-center justify-center space-x-2">
+            {apiStatus === 'connected' && (
+              <>
+                <Wifi className="h-4 w-4 text-green-500" />
+                <span className="text-sm text-green-600 dark:text-green-400">API Connected</span>
+              </>
+            )}
+            {apiStatus === 'offline' && (
+              <>
+                <WifiOff className="h-4 w-4 text-red-500" />
+                <span className="text-sm text-red-600 dark:text-red-400">API Offline</span>
+              </>
+            )}
+            {apiStatus === 'error' && (
+              <>
+                <AlertCircle className="h-4 w-4 text-yellow-500" />
+                <span className="text-sm text-yellow-600 dark:text-yellow-400">API Error</span>
+              </>
+            )}
+            {apiStatus === 'checking' && (
+              <>
+                <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
+                <span className="text-sm text-blue-600 dark:text-blue-400">Checking API...</span>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -223,7 +278,7 @@ const ImageDetection = () => {
                 </div>
                 <button
                   onClick={analyzeImage}
-                  disabled={!selectedImage || isLoading}
+                  disabled={!selectedImage || isLoading || apiStatus !== 'connected'}
                   className="px-6 py-2 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
                 >
                   {isLoading ? (
@@ -238,12 +293,29 @@ const ImageDetection = () => {
                     </>
                   )}
                 </button>
+                <button
+                  onClick={checkApiStatus}
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+                >
+                  Check API
+                </button>
               </div>
               
               {error && (
                 <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center space-x-2">
                   <AlertCircle className="h-5 w-5 text-red-500" />
                   <span className="text-red-700 dark:text-red-400 text-sm">{error}</span>
+                </div>
+              )}
+              
+              {apiStatus === 'offline' && (
+                <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <h4 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                    Backend API Not Available
+                  </h4>
+                  <p className="text-yellow-700 dark:text-yellow-300 text-sm">
+                    Please start the backend server or deploy it using the deployment guide.
+                  </p>
                 </div>
               )}
             </div>
@@ -267,9 +339,11 @@ const ImageDetection = () => {
                     <span className="text-4xl">🎭</span>
                   </div>
                   <p className="text-gray-500 dark:text-gray-400">
-                    {selectedImage 
-                      ? 'Click "Analyze Emotion" to see results' 
-                      : 'Upload an image to get started'
+                    {apiStatus !== 'connected' 
+                      ? 'API not available'
+                      : selectedImage 
+                        ? 'Click "Analyze Emotion" to see results' 
+                        : 'Upload an image to get started'
                     }
                   </p>
                 </div>
@@ -309,6 +383,14 @@ const ImageDetection = () => {
                   <span className="text-gray-600 dark:text-gray-400">Input:</span>
                   <span className="text-black dark:text-white font-medium">
                     {selectedImage ? 'Image uploaded' : 'No image'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">API:</span>
+                  <span className={`font-medium text-xs ${
+                    apiStatus === 'connected' ? 'text-green-500' : 'text-red-500'
+                  }`}>
+                    {import.meta.env.VITE_API_URL || 'http://localhost:8000'}
                   </span>
                 </div>
               </div>
