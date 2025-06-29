@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import WebcamCapture from '../components/WebcamCapture';
 import ModelSelector from '../components/ModelSelector';
 import EmotionCard from '../components/EmotionCard';
@@ -49,11 +49,6 @@ const Detection = () => {
     'sadness': '😢'
   };
 
-  // Check API status on component mount
-  useState(() => {
-    checkApiStatus();
-  }, []);
-
   const checkApiStatus = async () => {
     try {
       const response = await fetch(API_ENDPOINTS.HEALTH);
@@ -67,6 +62,11 @@ const Detection = () => {
       setError('Backend API is not available. Please check if the server is running.');
     }
   };
+
+  // Check API status on component mount
+  useEffect(() => {
+    checkApiStatus();
+  }, []);
 
   const handleFrame = useCallback(async (frameBlob) => {
     if (!isDetecting || apiStatus !== 'connected') return;
