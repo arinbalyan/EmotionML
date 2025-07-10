@@ -2,6 +2,8 @@
 
 A comprehensive real-time emotion detection system powered by deep learning models and modern web technologies. This application combines 9 pre-trained PyTorch models with an intuitive React frontend and FastAPI backend for accurate emotion recognition.
 
+- Due to the free tier hosting the frontend and backend might be slow to load 1 to 2 minute as the render service shut  down and redeploy them only when they are tried to accessed.
+
 ## 🚀 Features
 
 - **9 Pre-trained Models**: Choose from MobileNetV2, ResNet50, and VGG19 architectures trained on FER2013, RAF-DB, and CK+48 datasets
