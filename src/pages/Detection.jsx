@@ -35,17 +35,17 @@ const Detection = () => {
     'sad': '😢',
     'surprise': '😲',
     // RAF-DB emotions
-    'Surprise': '😲',
-    'Fear': '😨',
-    'Disgust': '🤢',
-    'Happiness': '😊',
-    'Sadness': '😢',
-    'Anger': '😠',
-    'Neutral': '😐',
+    // 'Surprise': '😲', // duplicate of 'surprise'
+    // 'Fear': '😨', // duplicate of 'fear'
+    // 'Disgust': '🤢', // duplicate of 'disgust'
+    // 'Happiness': '😊', // duplicate of 'happy'
+    // 'Sadness': '😢', // duplicate of 'sad'
+    // 'Anger': '😠', // duplicate of 'angry'
+    // 'Neutral': '😐', // duplicate of 'neutral'
     // CK+48 emotions
-    'anger': '😠',
+    // 'anger': '😠', // duplicate of 'angry'
     'contempt': '😤',
-    'happy': '😊',
+    // 'happy': '😊', // duplicate of 'happy'
     'sadness': '😢'
   };
 
