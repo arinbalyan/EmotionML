@@ -13,7 +13,7 @@ A comprehensive real-time emotion detection system powered by deep learning mode
 - **Deployment Ready**: Complete deployment guides for multiple platforms
 
 ## 📊 Model Performance
-
+ 
 | Model | FER2013 | RAF-DB | CK+48 |
 |-------|---------|---------|-------|
 | **MobileNetV2** | 55.68% | 73.57% | 97.98% |
