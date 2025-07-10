@@ -158,22 +158,21 @@ def load_model(model_name: str):
         logger.error(f"Error loading model {model_name}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error loading model: {str(e)}")
 
-@app.on_event("startup")
-async def startup_event():
-    """Load all models on startup"""
-    logger.info("Loading emotion detection models...")
-    
-    # Check if results directory exists
-    if not os.path.exists("results"):
-        logger.warning("Results directory not found. Models will be loaded on demand.")
-        return
-    
-    # Load each model
-    for model_name in MODEL_CONFIGS.keys():
-        try:
-            load_model(model_name)
-        except Exception as e:
-            logger.warning(f"Could not load model {model_name}: {str(e)}")
+# Remove the startup event that loads all models
+# @app.on_event("startup")
+# async def startup_event():
+#     """Load all models on startup"""
+#     logger.info("Loading emotion detection models...")
+#     # Check if results directory exists
+#     if not os.path.exists("results"):
+#         logger.warning("Results directory not found. Models will be loaded on demand.")
+#         return
+#     # Load each model
+#     for model_name in MODEL_CONFIGS.keys():
+#         try:
+#             load_model(model_name)
+#         except Exception as e:
+#             logger.warning(f"Could not load model {model_name}: {str(e)}")
 
 @app.get("/")
 async def root():
